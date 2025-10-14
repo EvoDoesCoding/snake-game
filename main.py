@@ -34,9 +34,16 @@ class SnakeGame:
     def __init__(self, screen: curses.window) -> None:
         self.screen = screen
         max_y, max_x = screen.getmaxyx()
-        if max_y < 10 or max_x < 20:
-            raise ValueError("Terminal window too small for Snake (min 20x10).")
-        self.play_area = (max_y - 2, max_x - 2)  # usable cells inside the border
+        self.cell_width = 2  # render each logical cell using two characters
+        min_width = self.cell_width * 10 + 2  # keep at least 10 playable columns
+        if max_y < 10 or max_x < min_width:
+            raise ValueError("Terminal window too small for Snake (min 22x10).")
+        usable_rows = max_y - 2
+        usable_cols = max_x - 2
+        self.play_area = (
+            usable_rows,
+            usable_cols // self.cell_width,
+        )  # usable cells inside the border
         self.snake: Deque[Point] = deque()
         self.food: Point | None = None
         self.current_direction: Tuple[int, int] = DIRECTIONS[curses.KEY_RIGHT]
@@ -133,7 +140,9 @@ class SnakeGame:
 
     def _draw_cell(self, point: Point, char: str) -> None:
         # Offset by 1 to account for the border.
-        self.screen.addch(point.row + 1, point.col + 1, char)
+        row = point.row + 1
+        col = point.col * self.cell_width + 1
+        self.screen.addstr(row, col, char * self.cell_width)
 
     # Utility -------------------------------------------------------------
     def _inside_board(self, point: Point) -> bool:
@@ -150,7 +159,8 @@ class SnakeGame:
         rows, cols = self.play_area
         center_row = rows // 2
         message = f" Game over! Final score: {self.score}. Press any key. "
-        x = max(1, (cols - len(message)) // 2)
+        display_width = cols * self.cell_width
+        x = max(1, (display_width - len(message)) // 2)
         y = center_row
         self.screen.addstr(y, x, message)
         self.screen.refresh()
