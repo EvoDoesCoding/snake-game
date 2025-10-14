@@ -1,20 +1,25 @@
-## Simple Greeting Program
+## Terminal Snake Game
 
-This repository contains a tiny Python script that prints a friendly greeting.\
-You can optionally pass a name to personalize the message.
+This repository contains a minimalist implementation of the classic Snake game\
+for the terminal using Python's built-in `curses` module.
 
 ### Requirements
 
 - Python 3.8 or newer
+- A terminal that supports curses (macOS, Linux, WSL, etc.)
 
-### Usage
+### Running the Game
 
 ```bash
 python main.py
-python main.py Alice
 ```
 
-### Next Steps
+Use the arrow keys to steer the snake. Collect food (`*`) to grow longer and\
+increase your score. Press `q` to quit at any time. You will need a terminal\
+window of at least 20 columns by 10 rows.
 
-You can extend the script by adding more options, saving greetings to a file, or\
-turning it into a web service.
+### Ideas to Extend
+
+- Add a persistent high-score tracker.
+- Introduce obstacles or different game modes.
+- Port the logic to a GUI framework such as pygame or tkinter.
