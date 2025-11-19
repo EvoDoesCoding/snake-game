@@ -11,8 +11,8 @@ const COLS = 20;
 const ROWS = 20;
 const CELL_SIZE = canvas.width / COLS;
 
-const INITIAL_SPEED_MS = 230;
-const TARGET_SPEED_MS = 120;
+const INITIAL_SPEED_MS = 260;
+const TARGET_SPEED_MS = 150;
 const WARMUP_DURATION_MS = 3000;
 const RAMP_DURATION_MS = 4000;
 
