@@ -39,6 +39,7 @@ let speedMs = 160;
 let score = 0;
 let running = false;
 let gameOver = false;
+let touchStartPoint = null;
 
 function resetGame() {
   const centerRow = Math.floor(ROWS / 2);
@@ -228,6 +229,50 @@ document.addEventListener("keydown", (event) => {
     running ? pauseGame() : startGame();
   }
 });
+
+function handleSwipe(start, end) {
+  if (!start || !end) {
+    return;
+  }
+  const deltaX = end.clientX - start.clientX;
+  const deltaY = end.clientY - start.clientY;
+  const absX = Math.abs(deltaX);
+  const absY = Math.abs(deltaY);
+  const threshold = 30;
+  if (Math.max(absX, absY) < threshold) {
+    return;
+  }
+
+  if (absX > absY) {
+    queueDirection(deltaX > 0 ? "d" : "a");
+  } else {
+    queueDirection(deltaY > 0 ? "s" : "w");
+  }
+}
+
+const touchTarget = canvas || document;
+
+touchTarget.addEventListener(
+  "touchstart",
+  (event) => {
+    if (event.touches.length > 0) {
+      touchStartPoint = event.touches[0];
+    }
+  },
+  { passive: true }
+);
+
+touchTarget.addEventListener(
+  "touchend",
+  (event) => {
+    if (event.changedTouches.length > 0) {
+      event.preventDefault();
+      handleSwipe(touchStartPoint, event.changedTouches[0]);
+      touchStartPoint = null;
+    }
+  },
+  { passive: false }
+);
 
 startBtn.addEventListener("click", startGame);
 pauseBtn.addEventListener("click", pauseGame);
