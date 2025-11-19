@@ -13,10 +13,11 @@ The primary version of the game runs in any modern web browser. It features a cl
 
 1.  Open the `index.html` file in your web browser.
 2.  Click the **Start** button to begin.
-3.  Use the **arrow keys** or **WASD** keys to steer the snake.
-4.  Eat the food (`■`) to grow longer and increase your score.
-5.  Press the **Pause** button to freeze the game at any time.
-6.  Click **Retry** to start a new game after a game over.
+3.  On desktop or laptop browsers, use the **arrow keys** or **WASD** keys to steer the snake.
+4.  On phones or tablets, swipe anywhere on the canvas in the direction you want the snake to travel (horizontal or vertical swipes work best).
+5.  Eat the food (`■`) to grow longer and increase your score.
+6.  Press the **Pause** button to freeze the game at any time.
+7.  Click **Retry** to start a new game after a game over.
 
 ### Files
 
