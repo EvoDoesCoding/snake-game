@@ -160,6 +160,7 @@ function pauseGame() {
   statusEl.textContent = "Paused.";
   updatePauseButton();
   updateControlVisibility();
+  draw();
 }
 
 function resumeGame() {
@@ -173,6 +174,7 @@ function resumeGame() {
   updateControlVisibility();
   beginSpeedTracking();
   scheduleTick();
+  draw();
 }
 
 function retryGame() {
@@ -382,6 +384,7 @@ function endGame() {
   paused = false;
   updatePauseButton();
   updateControlVisibility();
+  draw();
 }
 
 function queueDirection(key) {
