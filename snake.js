@@ -42,6 +42,8 @@ let gameOver = false;
 let paused = false;
 let started = false;
 let touchStartPoint = null;
+let countdownRemaining = 0;
+let countdownIntervalId = null;
 
 function resetGame() {
   const centerRow = Math.floor(ROWS / 2);
@@ -60,6 +62,7 @@ function resetGame() {
   paused = false;
   started = false;
   clearTimeout(loopId);
+  clearCountdown();
   placeFood();
   updateScore();
   draw();
@@ -67,6 +70,14 @@ function resetGame() {
   updatePauseButton();
   updateStartButtonState();
   updateControlVisibility();
+}
+
+function clearCountdown() {
+  if (countdownIntervalId) {
+    clearInterval(countdownIntervalId);
+    countdownIntervalId = null;
+  }
+  countdownRemaining = 0;
 }
 
 function shadeColor(hex, percent) {
@@ -91,17 +102,34 @@ function updateScore() {
 }
 
 function startGame() {
-  if (running || gameOver || started) {
+  if (running || gameOver || started || countdownRemaining > 0) {
     return;
   }
   started = true;
-  running = true;
   paused = false;
-  statusEl.textContent = "Good luck!";
+  clearCountdown();
+  countdownRemaining = 3;
+  statusEl.textContent = `Starting in ${countdownRemaining}...`;
   updateStartButtonState();
   updateControlVisibility();
   updatePauseButton();
-  scheduleTick();
+  draw();
+  countdownIntervalId = setInterval(() => {
+    countdownRemaining -= 1;
+    if (countdownRemaining > 0) {
+      statusEl.textContent = `Starting in ${countdownRemaining}...`;
+      draw();
+      return;
+    }
+    clearCountdown();
+    running = true;
+    paused = false;
+    statusEl.textContent = "Good luck!";
+    updatePauseButton();
+    updateControlVisibility();
+    draw();
+    scheduleTick();
+  }, 1000);
 }
 
 function pauseGame() {
@@ -202,7 +230,8 @@ function drawFood() {
 }
 
 function drawScreenOverlay() {
-  if (!paused && !gameOver) {
+  const countingDown = countdownRemaining > 0;
+  if (!paused && !gameOver && !countingDown) {
     return;
   }
   ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
@@ -219,9 +248,17 @@ function drawScreenOverlay() {
   ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
   ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
 
-  const title = gameOver ? "GAME OVER" : "PAUSED";
-  const subtext = gameOver ? "Press Retry to start again" : "Press Continue to resume";
-  const retroLine = "- Snake v1.0 -";
+  const title = gameOver
+    ? "GAME OVER"
+    : countingDown
+    ? countdownRemaining.toString()
+    : "PAUSED";
+  const subtext = gameOver
+    ? "Press Retry to start again"
+    : countingDown
+    ? "Get ready to slither"
+    : "Press Continue to resume";
+  const retroLine = countingDown ? "- Starting soon -" : "- Snake v1.0 -";
 
   const previousTextAlign = ctx.textAlign;
   const previousBaseline = ctx.textBaseline;
