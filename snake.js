@@ -11,6 +11,11 @@ const COLS = 20;
 const ROWS = 20;
 const CELL_SIZE = canvas.width / COLS;
 
+const INITIAL_SPEED_MS = 230;
+const TARGET_SPEED_MS = 120;
+const WARMUP_DURATION_MS = 3000;
+const RAMP_DURATION_MS = 4000;
+
 const DIRECTIONS = {
   ArrowUp: { row: -1, col: 0 },
   ArrowDown: { row: 1, col: 0 },
@@ -35,7 +40,6 @@ let direction = { row: 0, col: 1 };
 let pendingDirection = direction;
 let food = null;
 let loopId = null;
-let speedMs = 160;
 let score = 0;
 let running = false;
 let gameOver = false;
@@ -44,6 +48,8 @@ let started = false;
 let touchStartPoint = null;
 let countdownRemaining = 0;
 let countdownIntervalId = null;
+let activeTimerStart = null;
+let accumulatedActiveMs = 0;
 
 function resetGame() {
   const centerRow = Math.floor(ROWS / 2);
@@ -55,7 +61,6 @@ function resetGame() {
   ];
   direction = { row: 0, col: 1 };
   pendingDirection = direction;
-  speedMs = 160;
   score = 0;
   running = false;
   gameOver = false;
@@ -63,6 +68,7 @@ function resetGame() {
   started = false;
   clearTimeout(loopId);
   clearCountdown();
+  resetSpeedTracking();
   placeFood();
   updateScore();
   draw();
@@ -127,6 +133,8 @@ function startGame() {
     statusEl.textContent = "Good luck!";
     updatePauseButton();
     updateControlVisibility();
+    resetSpeedTracking();
+    beginSpeedTracking();
     draw();
     scheduleTick();
   }, 1000);
@@ -136,6 +144,7 @@ function pauseGame() {
   if (!running) {
     return;
   }
+  pauseSpeedTracking();
   running = false;
   paused = true;
   clearTimeout(loopId);
@@ -153,6 +162,7 @@ function resumeGame() {
   statusEl.textContent = "Game resumed.";
   updatePauseButton();
   updateControlVisibility();
+  beginSpeedTracking();
   scheduleTick();
 }
 
@@ -163,12 +173,13 @@ function retryGame() {
 
 function scheduleTick() {
   clearTimeout(loopId);
+  const delay = getCurrentSpeedMs();
   loopId = setTimeout(() => {
     step();
     if (running) {
       scheduleTick();
     }
-  }, speedMs);
+  }, delay);
 }
 
 function step() {
@@ -188,7 +199,6 @@ function step() {
     score += 1;
     updateScore();
     placeFood();
-    speedMs = Math.max(60, speedMs * 0.95);
   } else {
     snake.pop();
   }
@@ -281,6 +291,51 @@ function drawScreenOverlay() {
   ctx.textBaseline = previousBaseline;
 }
 
+function nowMs() {
+  return typeof performance !== "undefined" ? performance.now() : Date.now();
+}
+
+function beginSpeedTracking() {
+  if (activeTimerStart === null) {
+    activeTimerStart = nowMs();
+  }
+}
+
+function pauseSpeedTracking() {
+  if (activeTimerStart !== null) {
+    accumulatedActiveMs += nowMs() - activeTimerStart;
+    activeTimerStart = null;
+  }
+}
+
+function resetSpeedTracking() {
+  activeTimerStart = null;
+  accumulatedActiveMs = 0;
+}
+
+function getElapsedActiveMs() {
+  return (
+    accumulatedActiveMs +
+    (activeTimerStart !== null ? nowMs() - activeTimerStart : 0)
+  );
+}
+
+function getCurrentSpeedMs() {
+  const elapsed = getElapsedActiveMs();
+  if (elapsed <= WARMUP_DURATION_MS) {
+    return INITIAL_SPEED_MS;
+  }
+  if (elapsed >= WARMUP_DURATION_MS + RAMP_DURATION_MS) {
+    return TARGET_SPEED_MS;
+  }
+  const rampProgress =
+    (elapsed - WARMUP_DURATION_MS) / RAMP_DURATION_MS;
+  return (
+    INITIAL_SPEED_MS -
+    (INITIAL_SPEED_MS - TARGET_SPEED_MS) * rampProgress
+  );
+}
+
 function placeFood() {
   const openCells = [];
   for (let row = 0; row < ROWS; row++) {
@@ -310,6 +365,7 @@ function hitsBody(point) {
 }
 
 function endGame() {
+  pauseSpeedTracking();
   running = false;
   gameOver = true;
   clearTimeout(loopId);
