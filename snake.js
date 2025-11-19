@@ -372,6 +372,7 @@ function updatePauseButton() {
     return;
   }
   pauseBtn.textContent = paused && !gameOver ? "Continue" : "Pause";
+  updateControlVisibility();
 }
 
 function updateStartButtonState() {
@@ -379,4 +380,15 @@ function updateStartButtonState() {
     return;
   }
   startBtn.disabled = started;
+}
+
+function updateControlVisibility() {
+  if (!startBtn || !pauseBtn || !retryBtn) {
+    return;
+  }
+  const showStart = !started && !running && !gameOver;
+  const showPause = started && !gameOver;
+  startBtn.style.display = showStart ? "" : "none";
+  pauseBtn.style.display = showPause ? "" : "none";
+  retryBtn.style.display = gameOver ? "" : "none";
 }
