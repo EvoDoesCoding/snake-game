@@ -47,7 +47,7 @@ body::before {
   display: flex;
   flex-wrap: wrap;
   gap: clamp(24px, 4vw, 48px);
-  width: min(90vw, 1600px);
+  width: min(92vw, 1600px);
   justify-content: space-between;
   position: relative;
   z-index: 1;
@@ -118,7 +118,11 @@ body::before {
   background: #050505;
   border-radius: 18px;
   border: 2px solid rgba(255, 255, 255, 0.08);
+  width: min(90vw, 640px);
   max-width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  margin-inline: auto;
   image-rendering: pixelated;
   touch-action: none;
   box-shadow:
@@ -128,13 +132,13 @@ body::before {
 
 .controls {
   margin-top: 16px;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
-  justify-content: center;
 }
 
 .controls button {
-  flex: 1 1 140px;
+  width: 100%;
 }
 
 .color-picker {
@@ -160,8 +164,8 @@ body::before {
 button {
   border: none;
   border-radius: 999px;
-  padding: 12px 26px;
-  font-size: 1rem;
+  padding: clamp(10px, 0.9vw + 6px, 14px) clamp(20px, 1.5vw + 10px, 32px);
+  font-size: clamp(0.95rem, 0.4vw + 0.9rem, 1.05rem);
   font-weight: 600;
   cursor: pointer;
   background: linear-gradient(135deg, var(--snake-color), var(--snake-accent-color));
@@ -222,21 +226,58 @@ button:hover {
   color: var(--snake-accent-color);
 }
 
+@media (max-width: 900px) {
+  .panel,
+  .instructions {
+    padding: 22px;
+  }
+
+  .panel h1 {
+    font-size: clamp(1.8rem, 4vw, 2.2rem);
+  }
+
+  .scoreboard {
+    font-size: 1rem;
+  }
+
+  .color-picker {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
 @media (max-width: 600px) {
   body {
     padding: 16px;
+    align-items: center;
   }
 
   .layout {
     gap: 16px;
+    width: 100%;
   }
 
   .controls {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: 1fr;
   }
 
-  .controls button {
-    width: min(200px, 100%);
+  button {
+    border-radius: 20px;
+  }
+
+  .instructions {
+    order: 2;
+  }
+}
+
+@media (max-width: 420px) {
+  button {
+    font-size: 0.9rem;
+    padding: 10px 16px;
+  }
+
+  .panel,
+  .instructions {
+    padding: 18px;
   }
 }
