@@ -118,7 +118,10 @@ body::before {
   background: #050505;
   border-radius: 18px;
   border: 2px solid rgba(255, 255, 255, 0.08);
+  width: min(100%, 520px);
   max-width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
   image-rendering: pixelated;
   touch-action: none;
   box-shadow:
@@ -225,18 +228,41 @@ button:hover {
 @media (max-width: 600px) {
   body {
     padding: 16px;
+    align-items: stretch;
   }
 
   .layout {
+    flex-direction: column;
     gap: 16px;
+    width: 100%;
+  }
+
+  .panel,
+  .instructions {
+    flex: 1 1 auto;
+    width: 100%;
+    padding: 22px;
   }
 
   .controls {
     flex-direction: column;
     align-items: center;
+    width: 100%;
   }
 
   .controls button {
-    width: min(200px, 100%);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .color-picker {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  #board {
+    width: 100%;
+    max-width: none;
   }
 }
