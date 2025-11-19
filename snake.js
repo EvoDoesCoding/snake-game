@@ -40,6 +40,7 @@ let score = 0;
 let running = false;
 let gameOver = false;
 let paused = false;
+let started = false;
 let touchStartPoint = null;
 
 function resetGame() {
@@ -57,12 +58,14 @@ function resetGame() {
   running = false;
   gameOver = false;
   paused = false;
+  started = false;
   clearTimeout(loopId);
   placeFood();
   updateScore();
   draw();
   statusEl.textContent = "Press Start to begin.";
   updatePauseButton();
+  updateStartButtonState();
 }
 
 function shadeColor(hex, percent) {
@@ -87,13 +90,15 @@ function updateScore() {
 }
 
 function startGame() {
-  if (running || gameOver) {
+  if (running || gameOver || started) {
     return;
   }
+  started = true;
   running = true;
   paused = false;
   statusEl.textContent = "Good luck!";
   updatePauseButton();
+  updateStartButtonState();
   scheduleTick();
 }
 
@@ -106,6 +111,17 @@ function pauseGame() {
   clearTimeout(loopId);
   statusEl.textContent = "Paused.";
   updatePauseButton();
+}
+
+function resumeGame() {
+  if (running || gameOver || !paused) {
+    return;
+  }
+  running = true;
+  paused = false;
+  statusEl.textContent = "Game resumed.";
+  updatePauseButton();
+  scheduleTick();
 }
 
 function retryGame() {
@@ -153,7 +169,7 @@ function draw() {
 
   drawFood();
   drawSnake();
-  drawPauseOverlay();
+  drawScreenOverlay();
 }
 
 function drawSnake() {
@@ -181,17 +197,27 @@ function drawFood() {
   );
 }
 
-function drawPauseOverlay() {
-  if (!paused || gameOver) {
+function drawScreenOverlay() {
+  if (!paused && !gameOver) {
     return;
   }
   ctx.fillStyle = "rgba(5, 5, 5, 0.7)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const text = "Paused";
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 36px system-ui, sans-serif";
-  const textWidth = ctx.measureText(text).width;
-  ctx.fillText(text, (canvas.width - textWidth) / 2, canvas.height / 2 + 12);
+  ctx.fillStyle = "#f8f8f2";
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const title = gameOver ? "Game over" : "Paused";
+  const subtext = gameOver ? "Press Retry to play again" : "Press Continue to resume";
+  const previousTextAlign = ctx.textAlign;
+  const previousBaseline = ctx.textBaseline;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 32px 'Press Start 2P', 'VT323', system-ui, sans-serif";
+  ctx.fillText(title, centerX, centerY - 12);
+  ctx.font = "14px 'VT323', system-ui, sans-serif";
+  ctx.fillText(subtext, centerX, centerY + 22);
+  ctx.textAlign = previousTextAlign;
+  ctx.textBaseline = previousBaseline;
 }
 
 function placeFood() {
@@ -301,8 +327,8 @@ startBtn.addEventListener("click", startGame);
 pauseBtn.addEventListener("click", () => {
   if (running) {
     pauseGame();
-  } else if (!gameOver) {
-    startGame();
+  } else if (!gameOver && paused) {
+    resumeGame();
   }
 });
 retryBtn.addEventListener("click", retryGame);
@@ -326,4 +352,11 @@ function updatePauseButton() {
     return;
   }
   pauseBtn.textContent = paused && !gameOver ? "Continue" : "Pause";
+}
+
+function updateStartButtonState() {
+  if (!startBtn) {
+    return;
+  }
+  startBtn.disabled = started;
 }
