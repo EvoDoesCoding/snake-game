@@ -201,21 +201,41 @@ function drawScreenOverlay() {
   if (!paused && !gameOver) {
     return;
   }
-  ctx.fillStyle = "rgba(5, 5, 5, 0.7)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#f8f8f2";
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-  const title = gameOver ? "Game over" : "Paused";
-  const subtext = gameOver ? "Press Retry to play again" : "Press Continue to resume";
+
+  const boxWidth = canvas.width * 0.8;
+  const boxHeight = canvas.height * 0.55;
+  const boxX = (canvas.width - boxWidth) / 2;
+  const boxY = (canvas.height - boxHeight) / 2;
+
+  ctx.fillStyle = "#050505";
+  ctx.strokeStyle = "#2ee59d";
+  ctx.lineWidth = 6;
+  ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+  ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+  const title = gameOver ? "GAME OVER" : "PAUSED";
+  const subtext = gameOver ? "Press Retry to start again" : "Press Continue to resume";
+  const retroLine = "- Snake v1.0 -";
+
   const previousTextAlign = ctx.textAlign;
   const previousBaseline = ctx.textBaseline;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "bold 32px 'Press Start 2P', 'VT323', system-ui, sans-serif";
-  ctx.fillText(title, centerX, centerY - 12);
+
+  ctx.fillStyle = "#f8f8f2";
+  ctx.font = "bold 48px 'Press Start 2P', 'VT323', system-ui, sans-serif";
+  ctx.fillText(title, canvas.width / 2, boxY + boxHeight * 0.35);
+
+  ctx.fillStyle = "#8ef6d6";
+  ctx.font = "bold 20px 'VT323', system-ui, sans-serif";
+  ctx.fillText(subtext, canvas.width / 2, boxY + boxHeight * 0.6);
+
+  ctx.fillStyle = "#888";
   ctx.font = "14px 'VT323', system-ui, sans-serif";
-  ctx.fillText(subtext, centerX, centerY + 22);
+  ctx.fillText(retroLine, canvas.width / 2, boxY + boxHeight * 0.78);
+
   ctx.textAlign = previousTextAlign;
   ctx.textBaseline = previousBaseline;
 }
