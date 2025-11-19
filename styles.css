@@ -63,6 +63,25 @@ body {
   justify-content: center;
 }
 
+.color-picker {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.color-picker input[type="color"] {
+  width: 48px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 button {
   border: none;
   border-radius: 999px;

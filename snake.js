@@ -5,6 +5,7 @@ const statusEl = document.getElementById("status");
 const startBtn = document.getElementById("start-btn");
 const pauseBtn = document.getElementById("pause-btn");
 const retryBtn = document.getElementById("retry-btn");
+const colorInput = document.getElementById("snake-color");
 
 const COLS = 20;
 const ROWS = 20;
@@ -24,6 +25,10 @@ const DIRECTIONS = {
   A: { row: 0, col: -1 },
   D: { row: 0, col: 1 },
 };
+
+const DEFAULT_SNAKE_COLOR = "#2ee59d";
+let snakeColor = DEFAULT_SNAKE_COLOR;
+let snakeHeadColor = shadeColor(DEFAULT_SNAKE_COLOR, -0.25);
 
 let snake = [];
 let direction = { row: 0, col: 1 };
@@ -54,6 +59,23 @@ function resetGame() {
   updateScore();
   draw();
   statusEl.textContent = "Press Start to begin.";
+}
+
+function shadeColor(hex, percent) {
+  const normalized = Math.max(-1, Math.min(1, percent));
+  const amount = Math.round(255 * normalized);
+  const num = parseInt(hex.replace("#", ""), 16);
+  const clamp = (value) => Math.max(0, Math.min(255, value));
+  const r = clamp((num >> 16) + amount);
+  const g = clamp(((num >> 8) & 0x00ff) + amount);
+  const b = clamp((num & 0x0000ff) + amount);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function setSnakeColor(color) {
+  snakeColor = color;
+  snakeHeadColor = shadeColor(color, -0.25);
+  draw();
 }
 
 function updateScore() {
@@ -126,15 +148,15 @@ function draw() {
 }
 
 function drawSnake() {
-  ctx.fillStyle = "#2ee59d";
+  ctx.fillStyle = snakeColor;
   snake.forEach(({ row, col }, idx) => {
     const x = col * CELL_SIZE;
     const y = row * CELL_SIZE;
     ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
     if (idx === 0) {
-      ctx.fillStyle = "#1fb87a";
+      ctx.fillStyle = snakeHeadColor;
       ctx.fillRect(x + 4, y + 4, CELL_SIZE - 8, CELL_SIZE - 8);
-      ctx.fillStyle = "#2ee59d";
+      ctx.fillStyle = snakeColor;
     }
   });
 }
@@ -210,5 +232,13 @@ document.addEventListener("keydown", (event) => {
 startBtn.addEventListener("click", startGame);
 pauseBtn.addEventListener("click", pauseGame);
 retryBtn.addEventListener("click", retryGame);
+
+if (colorInput) {
+  colorInput.value = DEFAULT_SNAKE_COLOR;
+  setSnakeColor(colorInput.value);
+  colorInput.addEventListener("input", (event) => {
+    setSnakeColor(event.target.value || DEFAULT_SNAKE_COLOR);
+  });
+}
 
 resetGame();

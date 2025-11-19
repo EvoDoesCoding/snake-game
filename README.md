@@ -1,12 +1,37 @@
-## Terminal Snake Game
+# Snake Game
 
-This repository contains a minimalist implementation of the classic Snake game\
-for the terminal using Python's built-in `curses` module.
+This repository contains two implementations of the classic Snake game:
+
+- A feature-rich version for modern web browsers built with HTML, CSS, and JavaScript.
+- A minimalist version for the terminal written in Python using the `curses` module.
+
+## Web Version
+
+The primary version of the game runs in any modern web browser. It features a clean interface, a scoreboard, and controls to start, pause, and retry.
+
+### How to Play
+
+1.  Open the `index.html` file in your web browser.
+2.  Click the **Start** button to begin.
+3.  Use the **arrow keys** or **WASD** keys to steer the snake.
+4.  Eat the food (`■`) to grow longer and increase your score.
+5.  Press the **Pause** button to freeze the game at any time.
+6.  Click **Retry** to start a new game after a game over.
+
+### Files
+
+- `index.html`: The main HTML file for the game.
+- `styles.css`: The stylesheet for the game's appearance.
+- `snake.js`: The JavaScript file containing the game logic.
+
+## Terminal Version
+
+A simple version of Snake that can be played in a terminal window.
 
 ### Requirements
 
 - Python 3.8 or newer
-- A terminal that supports curses (macOS, Linux, WSL, etc.)
+- A terminal that supports `curses` (e.g., on macOS, Linux, or WSL).
 
 ### Running the Game
 
@@ -14,24 +39,14 @@ for the terminal using Python's built-in `curses` module.
 python main.py
 ```
 
-Use the arrow keys to steer the snake. Collect food (`*`) to grow longer and\
-increase your score. Press `q` to quit at any time. You will need a terminal\
-window of at least 20 columns by 10 rows.
+Use the arrow keys to steer the snake. Collect food (`*`) to grow longer and increase your score. Press `q` to quit at any time. Your terminal window must be at least 22 columns by 10 rows.
 
-### Play in the Browser
+### Files
 
-A modern browser version of the game lives in `web/`.
+- `main.py`: The Python script for the terminal-based game.
 
-```bash
-cd web
-python -m http.server 8000
-```
+## Ideas to Extend
 
-Then open `http://localhost:8000` and click the **Start** button. Use the arrow\
-keys or WASD to move, `Pause` to freeze, and `Retry` to start a new run.
-
-### Ideas to Extend
-
-- Add a persistent high-score tracker.
+- Add a persistent high-score tracker for the web version using `localStorage`.
 - Introduce obstacles or different game modes.
-- Port the logic to a GUI framework such as pygame or tkinter.
+- Port the terminal logic to a graphical UI framework like Pygame or Tkinter.
