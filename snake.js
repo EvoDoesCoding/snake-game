@@ -66,6 +66,7 @@ function resetGame() {
   statusEl.textContent = "Press Start to begin.";
   updatePauseButton();
   updateStartButtonState();
+  updateControlVisibility();
 }
 
 function shadeColor(hex, percent) {
@@ -97,8 +98,9 @@ function startGame() {
   running = true;
   paused = false;
   statusEl.textContent = "Good luck!";
-  updatePauseButton();
   updateStartButtonState();
+  updateControlVisibility();
+  updatePauseButton();
   scheduleTick();
 }
 
@@ -111,6 +113,7 @@ function pauseGame() {
   clearTimeout(loopId);
   statusEl.textContent = "Paused.";
   updatePauseButton();
+  updateControlVisibility();
 }
 
 function resumeGame() {
@@ -121,6 +124,7 @@ function resumeGame() {
   paused = false;
   statusEl.textContent = "Game resumed.";
   updatePauseButton();
+  updateControlVisibility();
   scheduleTick();
 }
 
@@ -275,6 +279,7 @@ function endGame() {
   statusEl.textContent = `Game over! Final score: ${score}. Click Retry to play again.`;
   paused = false;
   updatePauseButton();
+  updateControlVisibility();
 }
 
 function queueDirection(key) {
@@ -372,7 +377,6 @@ function updatePauseButton() {
     return;
   }
   pauseBtn.textContent = paused && !gameOver ? "Continue" : "Pause";
-  updateControlVisibility();
 }
 
 function updateStartButtonState() {
