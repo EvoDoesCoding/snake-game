@@ -39,6 +39,7 @@ let speedMs = 160;
 let score = 0;
 let running = false;
 let gameOver = false;
+let paused = false;
 let touchStartPoint = null;
 
 function resetGame() {
@@ -55,11 +56,13 @@ function resetGame() {
   score = 0;
   running = false;
   gameOver = false;
+  paused = false;
   clearTimeout(loopId);
   placeFood();
   updateScore();
   draw();
   statusEl.textContent = "Press Start to begin.";
+  updatePauseButton();
 }
 
 function shadeColor(hex, percent) {
@@ -88,7 +91,9 @@ function startGame() {
     return;
   }
   running = true;
+  paused = false;
   statusEl.textContent = "Good luck!";
+  updatePauseButton();
   scheduleTick();
 }
 
@@ -97,8 +102,10 @@ function pauseGame() {
     return;
   }
   running = false;
+  paused = true;
   clearTimeout(loopId);
   statusEl.textContent = "Paused.";
+  updatePauseButton();
 }
 
 function retryGame() {
@@ -146,6 +153,7 @@ function draw() {
 
   drawFood();
   drawSnake();
+  drawPauseOverlay();
 }
 
 function drawSnake() {
@@ -171,6 +179,19 @@ function drawFood() {
     CELL_SIZE - 8,
     CELL_SIZE - 8
   );
+}
+
+function drawPauseOverlay() {
+  if (!paused || gameOver) {
+    return;
+  }
+  ctx.fillStyle = "rgba(5, 5, 5, 0.7)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const text = "Paused";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 36px system-ui, sans-serif";
+  const textWidth = ctx.measureText(text).width;
+  ctx.fillText(text, (canvas.width - textWidth) / 2, canvas.height / 2 + 12);
 }
 
 function placeFood() {
@@ -206,6 +227,8 @@ function endGame() {
   gameOver = true;
   clearTimeout(loopId);
   statusEl.textContent = `Game over! Final score: ${score}. Click Retry to play again.`;
+  paused = false;
+  updatePauseButton();
 }
 
 function queueDirection(key) {
@@ -275,7 +298,13 @@ touchTarget.addEventListener(
 );
 
 startBtn.addEventListener("click", startGame);
-pauseBtn.addEventListener("click", pauseGame);
+pauseBtn.addEventListener("click", () => {
+  if (running) {
+    pauseGame();
+  } else if (!gameOver) {
+    startGame();
+  }
+});
 retryBtn.addEventListener("click", retryGame);
 
 if (colorInput) {
@@ -287,3 +316,14 @@ if (colorInput) {
 }
 
 resetGame();
+
+function updatePauseButton() {
+  if (!pauseBtn) {
+    return;
+  }
+  if (running) {
+    pauseBtn.textContent = "Pause";
+    return;
+  }
+  pauseBtn.textContent = paused && !gameOver ? "Continue" : "Pause";
+}
