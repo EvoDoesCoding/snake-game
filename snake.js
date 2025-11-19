@@ -100,6 +100,16 @@ function shadeColor(hex, percent) {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
+function hexToRgb(hex) {
+  const sanitized = hex.replace("#", "");
+  const num = parseInt(sanitized, 16);
+  return {
+    r: (num >> 16) & 0xff,
+    g: (num >> 8) & 0xff,
+    b: num & 0xff,
+  };
+}
+
 function setSnakeColor(color) {
   snakeColor = color;
   snakeHeadColor = shadeColor(color, -0.25);
@@ -108,6 +118,17 @@ function setSnakeColor(color) {
   if (rootEl) {
     rootEl.style.setProperty("--snake-color", snakeColor);
     rootEl.style.setProperty("--snake-accent-color", snakeAccentColor);
+    const glowColor = shadeColor(color, 0.2);
+    const glowRgb = hexToRgb(glowColor);
+    rootEl.style.setProperty(
+      "--snake-glow-rgb",
+      `${glowRgb.r}, ${glowRgb.g}, ${glowRgb.b}`
+    );
+    const accentRgb = hexToRgb(snakeAccentColor);
+    rootEl.style.setProperty(
+      "--snake-accent-color-rgb",
+      `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`
+    );
   }
   draw();
 }
@@ -225,29 +246,79 @@ function draw() {
   drawScreenOverlay();
 }
 
+function mixHexColors(colorA, colorB, weight) {
+  const a = parseInt(colorA.replace("#", ""), 16);
+  const b = parseInt(colorB.replace("#", ""), 16);
+  const aR = (a >> 16) & 0xff;
+  const aG = (a >> 8) & 0xff;
+  const aB = a & 0xff;
+  const bR = (b >> 16) & 0xff;
+  const bG = (b >> 8) & 0xff;
+  const bB = b & 0xff;
+  const lerp = (start, end) => Math.round(start + (end - start) * weight);
+  const r = lerp(aR, bR);
+  const g = lerp(aG, bG);
+  const blue = lerp(aB, bB);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + blue).toString(16).slice(1)}`;
+}
+
 function drawSnake() {
-  ctx.fillStyle = snakeColor;
+  const gradientSteps = Math.max(snake.length - 1, 1);
+  const brightColor = shadeColor(snakeColor, 0.12);
+  const darkColor = shadeColor(snakeColor, -0.12);
   snake.forEach(({ row, col }, idx) => {
     const x = col * CELL_SIZE;
     const y = row * CELL_SIZE;
+    const segmentColor = mixHexColors(brightColor, darkColor, idx / gradientSteps);
+    ctx.fillStyle = segmentColor;
     ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
     if (idx === 0) {
       ctx.fillStyle = snakeHeadColor;
       ctx.fillRect(x + 4, y + 4, CELL_SIZE - 8, CELL_SIZE - 8);
-      ctx.fillStyle = snakeColor;
     }
   });
 }
 
 function drawFood() {
   if (!food) return;
-  ctx.fillStyle = "#ff6b6b";
-  ctx.fillRect(
-    food.col * CELL_SIZE + 4,
-    food.row * CELL_SIZE + 4,
-    CELL_SIZE - 8,
-    CELL_SIZE - 8
-  );
+  const cellX = food.col * CELL_SIZE;
+  const cellY = food.row * CELL_SIZE;
+  const centerX = cellX + CELL_SIZE / 2;
+  const centerY = cellY + CELL_SIZE / 2;
+  const radius = CELL_SIZE * 0.32;
+
+  const pixelGrid = 4;
+  const pixelSize = radius * 0.6;
+  const startX = centerX - (pixelGrid * pixelSize) / 2;
+  const startY = centerY - (pixelGrid * pixelSize) / 2;
+
+  const baseColor = "#ff6b6b";
+  const highlightColor = shadeColor(baseColor, 0.25);
+  const shadowColor = shadeColor(baseColor, -0.2);
+  const depthColor = shadeColor(baseColor, -0.4);
+
+  ctx.imageSmoothingEnabled = false;
+
+  for (let row = 0; row < pixelGrid; row += 1) {
+    for (let col = 0; col < pixelGrid; col += 1) {
+      const squareCenterX = startX + col * pixelSize + pixelSize / 2;
+      const squareCenterY = startY + row * pixelSize + pixelSize / 2;
+      const distance = Math.hypot(squareCenterX - centerX, squareCenterY - centerY);
+      if (distance > radius) continue;
+      const mixAmount = (row + col) / (2 * (pixelGrid - 1));
+      const shadeTarget = mixAmount < 0.4 ? highlightColor : mixAmount < 0.75 ? baseColor : depthColor;
+      const segmentColor = mixHexColors(shadeTarget, shadowColor, mixAmount);
+      ctx.fillStyle = segmentColor;
+      ctx.fillRect(
+        startX + col * pixelSize,
+        startY + row * pixelSize,
+        pixelSize,
+        pixelSize
+      );
+    }
+  }
+
+  ctx.imageSmoothingEnabled = true;
 }
 
 function drawScreenOverlay() {
@@ -264,10 +335,7 @@ function drawScreenOverlay() {
   const boxY = (canvas.height - boxHeight) / 2;
 
   ctx.fillStyle = "#050505";
-  ctx.strokeStyle = snakeColor;
-  ctx.lineWidth = 6;
   ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-  ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
 
   const title = gameOver
     ? "GAME OVER"
