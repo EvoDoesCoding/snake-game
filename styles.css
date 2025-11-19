@@ -2,6 +2,8 @@
   font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: #111;
   color: #f4f4f4;
+  --snake-color: #2ee59d;
+  --snake-accent-color: #8ef6d6;
 }
 
 body {
@@ -90,7 +92,7 @@ button {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  background: #2ee59d;
+  background: var(--snake-color);
   color: #0a0a0a;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }

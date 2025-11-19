@@ -6,6 +6,7 @@ const startBtn = document.getElementById("start-btn");
 const pauseBtn = document.getElementById("pause-btn");
 const retryBtn = document.getElementById("retry-btn");
 const colorInput = document.getElementById("snake-color");
+const rootEl = document.documentElement;
 
 const COLS = 20;
 const ROWS = 20;
@@ -34,6 +35,8 @@ const DIRECTIONS = {
 const DEFAULT_SNAKE_COLOR = "#2ee59d";
 let snakeColor = DEFAULT_SNAKE_COLOR;
 let snakeHeadColor = shadeColor(DEFAULT_SNAKE_COLOR, -0.25);
+let snakeAccentColor = shadeColor(DEFAULT_SNAKE_COLOR, 0.35);
+let snakeRetroColor = shadeColor(DEFAULT_SNAKE_COLOR, -0.35);
 
 let snake = [];
 let direction = { row: 0, col: 1 };
@@ -100,6 +103,12 @@ function shadeColor(hex, percent) {
 function setSnakeColor(color) {
   snakeColor = color;
   snakeHeadColor = shadeColor(color, -0.25);
+  snakeAccentColor = shadeColor(color, 0.35);
+  snakeRetroColor = shadeColor(color, -0.35);
+  if (rootEl) {
+    rootEl.style.setProperty("--snake-color", snakeColor);
+    rootEl.style.setProperty("--snake-accent-color", snakeAccentColor);
+  }
   draw();
 }
 
@@ -253,7 +262,7 @@ function drawScreenOverlay() {
   const boxY = (canvas.height - boxHeight) / 2;
 
   ctx.fillStyle = "#050505";
-  ctx.strokeStyle = "#2ee59d";
+  ctx.strokeStyle = snakeColor;
   ctx.lineWidth = 6;
   ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
   ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
@@ -279,11 +288,11 @@ function drawScreenOverlay() {
   ctx.font = "bold 48px 'Press Start 2P', 'VT323', system-ui, sans-serif";
   ctx.fillText(title, canvas.width / 2, boxY + boxHeight * 0.35);
 
-  ctx.fillStyle = "#8ef6d6";
+  ctx.fillStyle = snakeAccentColor;
   ctx.font = "bold 20px 'VT323', system-ui, sans-serif";
   ctx.fillText(subtext, canvas.width / 2, boxY + boxHeight * 0.6);
 
-  ctx.fillStyle = "#888";
+  ctx.fillStyle = snakeRetroColor;
   ctx.font = "14px 'VT323', system-ui, sans-serif";
   ctx.fillText(retroLine, canvas.width / 2, boxY + boxHeight * 0.78);
 
